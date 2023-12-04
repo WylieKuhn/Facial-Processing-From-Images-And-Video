@@ -1,52 +1,57 @@
+"""
+
+This program takes every 30th frame of a video, extracts it, saves any detected faces to one folder and the full frame to another
+
+"""
+
+
+from deepface import DeepFace
 import cv2
-import matplotlib.pyplot as plt
 import os
 
-# Specify the input image path
-imagePath = r"C:\Users\Wylie\Documents\GitHub\Facial Processing From Images And Video\Images\test.jpg"
+# Set the path to your video 
+video_capture = cv2.VideoCapture(r"images\video_source.mp4")
+video_frames_directory = "Video Frames"
+detected_faces_directory = "Detected Faces"
 
-# Create a directory to save detected faces
-save_dir = "detected_faces"
-if not os.path.exists(save_dir):
-    os.makedirs(save_dir)
+os.makedirs(video_frames_directory, exist_ok=True)
+os.makedirs(detected_faces_directory, exist_ok=True)
 
-# Read the input image
-img = cv2.imread(imagePath)
+frame_number = 0
+n_frames = 29  # Extract every 30th frame, this can be changed to improve performance/time or video coverage
+detector_backend = "retinaface"  # Choose from ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface', 'mediapipe', 'yolov8', 'yunet', 'fastmtcnn']
 
-# Convert the image to grayscale
-gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+while True:
+    are_more_frames, frame = video_capture.read()
+    if not are_more_frames:
+        break
 
-# Load the face classifier
-face_classifier = cv2.CascadeClassifier(
-    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-)
+    # Check if the current frame number is a multiple of 30
+    if frame_number % (n_frames + 1) == 0:
+        # Detect faces using DeepFace
+        
 
-# Detect faces in the grayscale image
-faces = face_classifier.detectMultiScale(
-    gray_image, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40)
-)
+        faces = DeepFace.extract_faces(frame, enforce_detection=False, detector_backend=detector_backend)
 
-# Initialize a counter for unique identifier
-face_count = 1
+        # Save all frames
+        filename_all_frames = os.path.join(video_frames_directory, f"frame_{frame_number}.jpg")
+        cv2.imwrite(filename_all_frames, frame)
 
-# Iterate over detected faces
-for (x, y, w, h) in faces:
-    # Create a cropped face image
-    face_image = img[y:y+h, x:x+w]
+        # Process each detected face
+        for i, face in enumerate(faces):
 
-    # Save the cropped face image with a unique identifier
-    face_path = os.path.join(save_dir, "face_" + str(face_count) + ".jpg")
-    cv2.imwrite(face_path, face_image)
+            # Extract face coordinates
+            w = int(face["facial_area"]["w"])
+            h = int(face["facial_area"]["h"])
+            x = int(face["facial_area"]["x"])
+            y = int(face["facial_area"]["y"])
 
-    # Draw a rectangle around the detected face
-    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 4)
-    face_count += 1
+            # Extract and save the face
+            face_image = frame[y:y + h, x:x + w]
+            filename_detected_faces = os.path.join(detected_faces_directory, f"face_{frame_number}_{i + 1}.jpg")
+            cv2.imwrite(filename_detected_faces, face_image)
 
-# Convert the image back to RGB for display
-img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    frame_number += 1
 
-# Display the image with detected faces
-"""plt.figure(figsize=(20, 10))
-plt.imshow(img_rgb)
-plt.axis('off')
-plt.show()"""
+video_capture.release()
+cv2.destroyAllWindows()
