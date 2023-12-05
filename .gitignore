@@ -8,3 +8,11 @@ Video Frames/
 Detected Faces/
 
 Video Frames 2/
+
+faces/
+
+__pycache__/
+
+output_frames/
+
+output_results.csv
