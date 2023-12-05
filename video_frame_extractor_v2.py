@@ -1,7 +1,7 @@
 import cv2
 import os
 
-def extract_frames(input_video_path, output_folder):
+def extract_frames(input_video_path, output_folder, n_frames):
     # Create the output directory if it doesn't exist
     os.makedirs(output_folder, exist_ok=True)
 
@@ -10,6 +10,7 @@ def extract_frames(input_video_path, output_folder):
 
     # Set the frame number to 0 initially
     frame_number = 0
+    frame_count = 0
 
     while True:
         # Set the next frame to be decoded
@@ -26,14 +27,17 @@ def extract_frames(input_video_path, output_folder):
         cv2.imwrite(filename, frame)
 
         # Increment the frame number by the number of frames you want to skip
-        frame_number += 30  # Adjust the value as needed
+        frame_number += n_frames  # Adjust the value as needed
+        frame_count += 1
 
     # Release the video capture object
     video_capture.release()
+    print(f"VIDEO PROCESSING FINISHED, {frame_count} IMAGES CREATED")
+    
 
 # Example usage:
 input_video_path = "images/test_footage.mp4"
 output_folder = "output_frames"
 
 
-extract_frames(input_video_path, output_folder)
+#extract_frames(input_video_path, output_folder)
