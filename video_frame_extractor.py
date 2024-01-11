@@ -25,3 +25,5 @@ while True:
 
 video_capture.release()
 cv2.destroyAllWindows()
+
+#this is a comment
