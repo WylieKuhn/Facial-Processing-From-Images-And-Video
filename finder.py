@@ -2,10 +2,6 @@ from deepface import DeepFace
 import os
 import pandas as pd 
 
-
-# Set the folder with the extracted video frames you want to search
-
-
 def face_finder(check_directory, face_directory):
 
     master_results_dataframe = pd.DataFrame(columns=["identity", "source_x", "source_y", "source_w", "source_h", "VGG-Face_cosine"])
@@ -41,8 +37,6 @@ def face_finder(check_directory, face_directory):
             
     csv_filename = "output_results.csv"
     master_results_dataframe.to_csv(csv_filename, index=False)
-
-    print(master_results_dataframe)
 
 #db = "faces"
 #search_folder = "output_frames"
